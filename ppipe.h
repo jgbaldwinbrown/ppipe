@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define PIPEBUFSIZ 20
+
 struct ppipe {
     pthread_mutex_t mutex;
     pthread_cond_t not_empty;
