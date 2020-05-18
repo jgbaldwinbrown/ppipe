@@ -1,11 +1,11 @@
 all: mutex1 mutex2 mutex3 ppipe.o test
 
+clean:
+	-rm mutex1 mutex2 mutex3 *.o test
+
 CC := gcc
 CFLAGS := -Wall -Wextra -Wpedantic -O3
 LIBS := -pthread
-
-clean:
-	-rm mutex1 mutex2
 
 mutex1: mutex1.c
 	$(CC) $(CFLAGS) $(LIBS) -o $@ $<

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define PIPEBUFSIZ 20
 
@@ -14,7 +15,6 @@ struct ppipe {
     size_t end;
     bool closed;
     size_t member_size;
-    size_t nmemb;
 };
 
 struct int_generator {
@@ -30,9 +30,9 @@ struct int_multiplier {
     struct ppipe *op;
 };
 
-struct ppipe init_ppipe();
-void write_int_to_ppipe(struct ppipe *p, int i, bool close);
-int read_int_from_ppipe(struct ppipe *p, bool *closed);
+struct ppipe init_ppipe(size_t member_size);
+void ppipe_write(struct ppipe *p, const void *i, bool close);
+void ppipe_read(struct ppipe *p, void *i, bool *closed);
 void *generate_nums(void *inptr);
 void *multiply_nums(void *inptr);
 void *print_nums(void *inptr);
