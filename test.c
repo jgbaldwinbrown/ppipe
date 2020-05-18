@@ -64,6 +64,9 @@ int main(int argc, char *argv[]) {
     pthread_join(print_thread, NULL);
     pthread_join(mult_thread2, NULL);
     pthread_join(print_thread2, NULL);
+    
+    free_ppipe(p);
+    free_ppipe(op);
 
     /* Last thing that main() should do */
     pthread_exit(NULL);
