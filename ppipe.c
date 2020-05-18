@@ -10,6 +10,9 @@ struct ppipe init_ppipe(size_t member_size) {
     pthread_mutex_init(&p.mutex, NULL);
     pthread_cond_init(&p.not_empty, NULL);
     pthread_cond_init(&p.not_full, NULL);
+    if ((p.pipebuf = malloc(member_size * PIPEBUFSIZ)) == NULL) {
+        fputs("Out of memory.", stderr);
+    }
     for (size_t i=0; i<PIPEBUFSIZ; i++) {
         p.pipebuf[i]=0;
     }
@@ -18,6 +21,10 @@ struct ppipe init_ppipe(size_t member_size) {
     p.member_size = member_size;
     p.closed = false;
     return(p);
+}
+
+void free_ppipe(struct ppipe p) {
+    free(p.pipebuf);
 }
 
 void ppipe_write(struct ppipe *p, const void *i, bool close) {
@@ -32,9 +39,9 @@ void ppipe_write(struct ppipe *p, const void *i, bool close) {
         p->end = 0;
     }
     memcpy(&(p->pipebuf[(p->end * p->member_size)]), i, p->member_size);
-    p->end;
+    p->end++;
     p->closed = close;
-    /*printf("write%ld: start: %ld; end: %ld; val: %d; closed: %d\n", pthread_self(), p->start, p->end, i, p->closed);*/
+    /*printf("write%ld: start: %ld; end: %ld; closed: %d\n", pthread_self(), p->start, p->end, p->closed);*/
     pthread_cond_broadcast(&(p->not_empty));
     pthread_mutex_unlock(&(p->mutex));
 }
@@ -56,7 +63,7 @@ void ppipe_read(struct ppipe *p, void *out, bool *closed) {
         /*printf("read%ld: (p->end <= p->start) && p->closed\n", pthread_self());*/
         *closed = p->closed;
     }
-    /*printf("read%ld: start: %ld; end: %ld; val: %d; closed: %d\n", pthread_self(), p->start, p->end, i, *closed);*/
+    /*printf("read%ld: start: %ld; end: %ld; closed: %d\n", pthread_self(), p->start, p->end, *closed);*/
     pthread_mutex_unlock(&(p->mutex));
 }
 
@@ -91,8 +98,10 @@ void *print_nums(void *inptr) {
     struct ppipe *p = (struct ppipe *) inptr;
     /*printf("print%ld:\n", pthread_self());*/
     while (!closed) {
+        /*printf("print is reading:\n");*/
         ppipe_read(p, &i, &closed);
         if (!closed) {
+            /*printf("printing!\n");*/
             printf("%d\n", i);
         }
     }

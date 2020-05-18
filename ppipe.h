@@ -10,7 +10,7 @@ struct ppipe {
     pthread_mutex_t mutex;
     pthread_cond_t not_empty;
     pthread_cond_t not_full;
-    int pipebuf[PIPEBUFSIZ];
+    unsigned char *pipebuf;
     size_t start;
     size_t end;
     bool closed;
@@ -31,6 +31,7 @@ struct int_multiplier {
 };
 
 struct ppipe init_ppipe(size_t member_size);
+void free_ppipe(struct ppipe p);
 void ppipe_write(struct ppipe *p, const void *i, bool close);
 void ppipe_read(struct ppipe *p, void *i, bool *closed);
 void *generate_nums(void *inptr);
