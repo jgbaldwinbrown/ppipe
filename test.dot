@@ -1,0 +1,7 @@
+digraph test {
+    
+    Source -> {Multiplier_1 Multiplier_2}
+    Multiplier_1 -> Printer_1
+    Multiplier_2 -> Printer_2
+    
+}

@@ -1,4 +1,4 @@
-all: mutex1 mutex2 mutex3 ppipe.o test
+all: mutex1 mutex2 mutex3 ppipe.o test test.pdf
 
 clean:
 	-rm mutex1 mutex2 mutex3 *.o test
@@ -27,3 +27,7 @@ test.o: test.c ppipe.c ppipe.h
 
 test: test.o ppipe.o
 	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
+
+test.pdf: test.dot
+	cat $^ | dot -Nshape=box -Tpdf > $@
+
