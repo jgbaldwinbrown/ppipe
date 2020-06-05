@@ -58,7 +58,7 @@ void double_circular_array(struct circarr *c) {
     c->full = newfull;
 }
 
-struct circarr init_circular_array(size_t bufsiz, size_t member_size, size_t (*indexer) (void *)) {
+struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer) (void *)) {
     struct circarr c;
     if ((c->buf = calloc(bufsiz, member_size)) == NULL) {
         fputs("Out of memory.", stderr);
@@ -73,14 +73,27 @@ struct circarr init_circular_array(size_t bufsiz, size_t member_size, size_t (*i
     return(c);
 }
 
-void circular_array_add(struct circarr c, void *value) {
+void circarr_add(struct circarr c, void *value) {
     size_t index = c.index(value);
-    if 
+    size_t writepos = 0;
+    if (index - c->pos > c->bufsiz) {
+        double_circular_array(c);
+    }
+    size_t writepos = (c->pos % c->bufsiz) * c->member_size;
+    memcpy(&(c->buf[writepos]), value, c->member_size);
 }
 
-void circular_array_pop(struct circarr c, void *out) {
-    memcpy(out, &(c->buf[c->bufpos * c->member_size], c->member_size);
+void circarr_pop(struct circarr c, void *out) {
+    size_t readpos = (c->pos % c->bufsiz) * c->member_size;
+    memcpy(out, &(c->buf[readpos], c->member_size);
     c->full[c->pos % c->bufsiz] = false;
     c->pos++;
 }
 
+bool circarr_full(struct circarr c, size_t index) {
+    if (index - c->pos > c->bufsiz) {
+        return(false);
+    } else {
+        return(c->full[index % c->bufsiz]);
+    }
+}
