@@ -6,18 +6,76 @@ size_t int_indexer(void *input) {
     size_t j = 0;
     memcpy(&i, input, sizeof(int));
     j=i;
+    printf("index: %ld\n", j);
     return(j);
 }
 
-int main() {
+void test1() {
+    printf("test1:\n");
     struct circarr c = init_circarr(5, sizeof(int), int_indexer);
-    for (i=0; i<10; i++) {
-        circarr_add(c, &i);
+    int out = 0;
+    for (int i=0; i<10; i++) {
+        printf("adding:\n");
+        circarr_add(&c, &i);
+        circarr_print(c);
     }
-    for (j=0; j<10; j++) {
+    for (int j=0; j<10; j++) {
         if (circarr_full(c, j)) {
-            printf("%d\n", circarr_pop(c, j));
+            printf("popping:\n");
+            circarr_pop(&c, &out);
+            printf("%d\n", out);
         }
     }
+    circarr_free(c);
+}
+
+void test2() {
+    printf("test2:\n");
+    struct circarr c = init_circarr(5, sizeof(int), int_indexer);
+    int in[] = {5, 3, 4, 2, 6, 7, 1, 0, 9, 12, 10, 11, 8};
+    int out = 0;
+    for (size_t i=0; i<(sizeof(in) / sizeof(in[0])); i++) {
+        printf("adding:\n");
+        circarr_add(&c, &in[i]);
+        circarr_print(c);
+    }
+    for (size_t j=0; j<(sizeof(in) / sizeof(in[0])); j++) {
+        if (circarr_full(c, j)) {
+            printf("popping:\n");
+            circarr_pop(&c, &out);
+            printf("%d\n", out);
+        }
+    }
+    circarr_free(c);
+}
+
+void test3() {
+    printf("test3:\n");
+    struct circarr c = init_circarr(5, sizeof(int), int_indexer);
+    int in[] = {5, 3, 4, 2, 6, 7, 1, 0, 9, 12, 10, 11, 8};
+    int out = 0;
+    for (size_t i=0; i<(sizeof(in) / sizeof(in[0])); i++) {
+        printf("adding:\n");
+        circarr_add(&c, &in[i]);
+        circarr_print(c);
+        while (circarr_full(c, c.pos)) {
+            printf("popping:\n");
+            circarr_pop(&c, &out);
+            printf("%d\n", out);
+        }
+    }
+    while (circarr_full(c, c.pos)) {
+        printf("popping:\n");
+        circarr_pop(&c, &out);
+        printf("%d\n", out);
+        circarr_print(c);
+    }
+    circarr_free(c);
+}
+
+int main() {
+    test1();
+    test2();
+    test3();
     return(0);
 }

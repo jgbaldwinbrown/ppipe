@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 struct indexed_void {
     size_t index;
@@ -15,11 +16,13 @@ struct circarr {
     size_t member_size;
     size_t bufsiz;
     size_t (*index) (void *);
-}
+};
 
 size_t void_indexer(void *v);
 void double_circular_array(struct circarr *c);
 struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer) (void *));
-void circarr_add(struct circarr c, void *value);
-void circarr_pop(struct circarr c, void *out);
+void circarr_add(struct circarr *c, void *value);
+void circarr_pop(struct circarr *c, void *out);
 bool circarr_full(struct circarr c, size_t index);
+void circarr_print(struct circarr c);
+void circarr_free(struct circarr c);
