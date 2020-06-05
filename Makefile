@@ -1,4 +1,4 @@
-all: mutex1 mutex2 mutex3 ppipe.o test test_circarr
+all: mutex1 mutex2 mutex3 ppipe.o test test_circarr ppipe_merger.o
 
 clean:
 	-rm mutex1 mutex2 mutex3 *.o test
@@ -23,6 +23,9 @@ ppipe.o: ppipe.c ppipe.h
 	$(CC) $(CFLAGS) $(LIBS) -c $<
 
 circarr.o: circarr.c circarr.h
+	$(CC) $(CFLAGS) $(LIBS) -c $<
+
+ppipe_merger.o: ppipe_merger.c ppipe_merger.h circarr.h ppipe.h
 	$(CC) $(CFLAGS) $(LIBS) -c $<
 
 test.o: test.c ppipe.c ppipe.h
