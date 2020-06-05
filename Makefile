@@ -1,4 +1,4 @@
-all: mutex1 mutex2 mutex3 ppipe.o test
+all: mutex1 mutex2 mutex3 ppipe.o test test_circarr
 
 clean:
 	-rm mutex1 mutex2 mutex3 *.o test
@@ -22,8 +22,14 @@ mutex4: mutex4.c
 ppipe.o: ppipe.c ppipe.h
 	$(CC) $(CFLAGS) $(LIBS) -c $<
 
+circarr.o: circarr.c circarr.h
+	$(CC) $(CFLAGS) $(LIBS) -c $<
+
 test.o: test.c ppipe.c ppipe.h
 	$(CC) $(CFLAGS) $(LIBS) -c $<
 
 test: test.o ppipe.o
+	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
+
+test_circarr: test_circarr.o circarr.o
 	$(CC) $(CFLAGS) $(LIBS) $^ -o $@
