@@ -79,6 +79,10 @@ bool circarr_full(struct circarr c, size_t index) {
     }
 }
 
+bool circarr_poppable(struct circarr c) {
+    return(c.full[c.pos % c.bufsiz]);
+}
+
 void circarr_print(struct circarr c) {
     int temp = 0;
     size_t pos = 0;

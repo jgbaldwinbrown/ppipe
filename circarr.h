@@ -24,5 +24,6 @@ struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer)
 void circarr_add(struct circarr *c, void *value);
 void circarr_pop(struct circarr *c, void *out);
 bool circarr_full(struct circarr c, size_t index);
+bool circarr_full(struct circarr c);
 void circarr_print(struct circarr c);
 void circarr_free(struct circarr c);
