@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "circarr.h"
+#include "indexed_ints.h"
 
 size_t int_indexer(void *input) {
     int i = 0;
@@ -57,7 +58,7 @@ void test3() {
     for (size_t i=0; i<(sizeof(in) / sizeof(in[0])); i++) {
         printf("adding:\n");
         circarr_add(&c, &in[i]);
-        circarr_print(c);
+        /*circarr_print(c);*/
         while (circarr_full(c, c.pos)) {
             printf("popping:\n");
             circarr_pop(&c, &out);
@@ -68,7 +69,32 @@ void test3() {
         printf("popping:\n");
         circarr_pop(&c, &out);
         printf("%d\n", out);
-        circarr_print(c);
+        /*circarr_print(c);*/
+    }
+    circarr_free(c);
+}
+
+void test4() {
+    printf("test4:\n");
+    struct circarr c = init_circarr(5, sizeof(struct indexed_int), index_indexed_int);
+    struct indexed_int ii;
+    struct indexed_int oo;
+    for (size_t i=0; i<10; i++) {
+        printf("adding:\n");
+        ii.index = i;
+        ii.value = i*100;
+        circarr_add(&c, &ii);
+        /*circarr_print(c);*/
+        while (circarr_full(c, c.pos)) {
+            printf("popping:\n");
+            circarr_pop(&c, &oo);
+            indexed_int_print(oo);
+        }
+    }
+    while (circarr_full(c, c.pos)) {
+        printf("popping:\n");
+        circarr_pop(&c, &oo);
+        indexed_int_print(oo);
     }
     circarr_free(c);
 }
@@ -77,5 +103,6 @@ int main() {
     test1();
     test2();
     test3();
+    test4();
     return(0);
 }
