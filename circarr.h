@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+#ifndef CIRCARR_H
+#define CIRCARR_H
+
 struct indexed_void {
     size_t index;
     void *value;
@@ -17,6 +20,8 @@ struct circarr {
     size_t bufsiz;
     size_t (*index) (void *);
 };
+
+#endif
 
 size_t void_indexer(void *v);
 void double_circular_array(struct circarr *c);

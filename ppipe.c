@@ -49,21 +49,21 @@ void ppipe_write(struct ppipe *p, const void *i, bool close) {
 void ppipe_read(struct ppipe *p, void *out, bool *closed) {
     pthread_mutex_lock(&(p->mutex));
     while (p->end <= p->start && !p->closed) {
-        /*printf("read%ld: p->end <= p->start && !p->closed\n", pthread_self());*/
+        printf("read%ld: p->end <= p->start && !p->closed\n", pthread_self());
         pthread_cond_wait(&(p->not_empty), &(p->mutex));
     }
     memcpy(out, &(p->pipebuf[(p->start * p->member_size)]), p->member_size);
     p->start++;
     if (p->end < PIPEBUFSIZ || p->end <= p->start) {
-        /*printf("read%ld: p->end < PIPEBUFSIZ || p->end <= p->start\n", pthread_self());*/
+        printf("read%ld: p->end < PIPEBUFSIZ || p->end <= p->start\n", pthread_self());
         pthread_cond_broadcast(&(p->not_full));
     }
     *closed = false;
     if ((p->end <= p->start) && p->closed) {
-        /*printf("read%ld: (p->end <= p->start) && p->closed\n", pthread_self());*/
+        printf("read%ld: (p->end <= p->start) && p->closed\n", pthread_self());
         *closed = p->closed;
     }
-    /*printf("read%ld: start: %ld; end: %ld; closed: %d\n", pthread_self(), p->start, p->end, *closed);*/
+    printf("read%ld: start: %ld; end: %ld; closed: %d\n", pthread_self(), p->start, p->end, *closed);
     pthread_mutex_unlock(&(p->mutex));
 }
 

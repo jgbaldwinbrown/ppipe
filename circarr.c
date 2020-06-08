@@ -18,7 +18,7 @@ void double_circular_array(struct circarr *c) {
     for (size_t i=c->pos; i<c->bufsiz; i++) {
         size_t i_oldmod = i % c->bufsiz;
         size_t i_mod = i % new_bufsiz;
-        memcpy(&newbuf[i_mod * c->member_size], &c->buf[i_oldmod * c->member_size], c->member_size);
+        memcpy(&(newbuf[i_mod * c->member_size]), &(c->buf[i_oldmod * c->member_size]), c->member_size);
     }
     for (size_t i=c->pos; i<c->bufsiz; i++) {
         size_t i_oldmod = i % c->bufsiz;
@@ -36,12 +36,17 @@ void double_circular_array(struct circarr *c) {
 
 struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer) (void *)) {
     struct circarr c;
+    /*printf("init: bufsiz: %ld; member_size: %ld; c.buf: %p\n", bufsiz, member_size, c.buf);*/
     if ((c.buf = calloc(bufsiz, member_size)) == NULL) {
         fputs("Out of memory.", stderr);
     }
+    
+    /*
     for (size_t i=0; i<(bufsiz*member_size); i++) {
         c.buf[i] = 0;
     }
+    */
+    
     if ((c.full = calloc(bufsiz, sizeof(bool))) == NULL) {
         fputs("Out of memory.", stderr);
     }
@@ -49,17 +54,25 @@ struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer)
     c.member_size = member_size;
     c.bufsiz = bufsiz;
     c.index = indexer;
-    circarr_print(c);
+    /*circarr_print(c);*/
     return(c);
 }
 
 void circarr_add(struct circarr *c, void *value) {
+    printf("c->buf: %p\n", c->buf);
     size_t index = c->index(value);
     size_t writepos = 0;
-    if ((index - c->pos) >= c->bufsiz) {
+    printf("circarr_add: c->buf: %p; index: %ld; writepos: %ld\n", c->buf, index, writepos);
+    while ((index - c->pos) >= c->bufsiz) {
         double_circular_array(c);
     }
     writepos = (index % c->bufsiz) * c->member_size;
+    printf("writepos: %ld; member_size: %ld; bufsiz: %ld; index: %ld; c->buf: %p\n", writepos, c->member_size, c->bufsiz, index, c->buf);
+    printf("buffer contents:");
+    for (size_t i=0; i<c->member_size; i++) {
+        printf("\t%d", c->buf[writepos]);
+    }
+    printf("\n");
     memcpy(&(c->buf[writepos]), value, c->member_size);
     c->full[index%c->bufsiz] = true;
 }

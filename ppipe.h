@@ -6,6 +6,8 @@
 
 #define PIPEBUFSIZ 20
 
+#ifndef PPIPE_H
+#define PPIPE_H
 struct ppipe {
     pthread_mutex_t mutex;
     pthread_cond_t not_empty;
@@ -29,6 +31,8 @@ struct int_multiplier {
     struct ppipe *p;
     struct ppipe *op;
 };
+
+#endif
 
 struct ppipe init_ppipe(size_t member_size);
 void free_ppipe(struct ppipe p);
