@@ -8,8 +8,13 @@
 #define PIPEBUFSIZ	20
 
 size_t int_indexer(void *i) {
+    int ii = 0;
     int j = 0;
+    memcpy(&ii, i, sizeof(int));
+    j=ii;
+    /*
     memcpy(&j, i, sizeof(int));
+    */
     return(j);
 }
 

@@ -46,6 +46,12 @@ void ppipe_write(struct ppipe *p, const void *i, bool close) {
     pthread_mutex_unlock(&(p->mutex));
 }
 
+void ppipe_close(struct ppipe *p) {
+    pthread_mutex_lock(&(p->mutex));
+    p->closed = true;
+    pthread_mutex_unlock(&(p->mutex));
+}
+
 void ppipe_read(struct ppipe *p, void *out, bool *closed) {
     pthread_mutex_lock(&(p->mutex));
     while (p->end <= p->start && !p->closed) {
@@ -64,17 +70,18 @@ void ppipe_read(struct ppipe *p, void *out, bool *closed) {
         *closed = p->closed;
     }
     printf("read%ld: start: %ld; end: %ld; closed: %d\n", pthread_self(), p->start, p->end, *closed);
+    printf("ppipe_read: p->closed: %d; local_closed: %d; p->start: %ld; p->end: %ld\n", p->closed, *closed, p->start, p->end);
     pthread_mutex_unlock(&(p->mutex));
 }
 
 void *generate_nums(void *inptr) {
-    int err=-1;
     struct int_generator *gen = (struct int_generator *) inptr;
     /*printf("gen%ld:\n", pthread_self());*/
     for (int i=gen->start; i<gen->end; i+=gen->step) {
         ppipe_write(gen->p, &i, false);
     }
-    ppipe_write(gen->p, &err, true);
+    /*ppipe_write(gen->p, &err, true);*/
+    ppipe_close(gen->p);
     pthread_exit(NULL);
 }
 
@@ -86,9 +93,13 @@ void *multiply_nums(void *inptr) {
     /*printf("mult%ld:\n", pthread_self());*/
     while (!closed) {
         ppipe_read(mult->p, &i, &closed);
+        if (closed) {
+            break;
+        }
         i_mult = i * mult->factor;
         ppipe_write(mult->op, &i_mult, closed);
     }
+    ppipe_close(mult->op);
     pthread_exit(NULL);
 }
 

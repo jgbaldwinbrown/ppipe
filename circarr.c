@@ -32,6 +32,7 @@ void double_circular_array(struct circarr *c) {
     free(c->full);
     c->buf = newbuf;
     c->full = newfull;
+    printf("doubled!\n");
 }
 
 struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer) (void *)) {
