@@ -2,16 +2,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "ppipe.h"
+#include "ppipe_merger.h"
+#include "indexed_ints.h"
 
 #define PIPEBUFSIZ	20
 
+size_t int_indexer(void *i) {
+    int ii = 0;
+    memcpy(&ii, i, sizeof(int));
+    /*
+    memcpy(&j, i, sizeof(int));
+    */
+    return(ii);
+}
+
 int main(int argc, char *argv[]) {
     pthread_t gen_thread;
-    pthread_t mult_thread;
-    pthread_t mult_thread2;
+    pthread_t merge_thread;
     pthread_t print_thread;
-    pthread_t print_thread2;
     int rc;
     
     struct ppipe p = init_ppipe(sizeof(int), 1);
@@ -20,13 +28,13 @@ int main(int argc, char *argv[]) {
     struct int_generator gen;
     gen.start = 0;
     gen.end = 100;
-    gen.step = 2;
+    gen.step = 1;
     gen.p = &p;
     
-    struct int_multiplier mult;
-    mult.factor = 1000;
-    mult.p = &p;
-    mult.op = &op;
+    struct ppipe_merger merger;
+    merger.p = &p;
+    merger.op = &op;
+    merger.indexer = int_indexer;
 
     rc = pthread_create(&gen_thread, NULL, generate_nums, (void *)&gen);
     if (rc){
@@ -34,36 +42,23 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
     
-    rc = pthread_create(&mult_thread, NULL, multiply_nums, (void *)&mult);
+    rc = pthread_create(&merge_thread, NULL, ppipe_merge, (void *)&merger);
     if (rc){
         printf("ERROR; return code from pthread_create() is %d\n", rc);
         exit(-1);
     }
-    
-    rc = pthread_create(&mult_thread2, NULL, multiply_nums, (void *)&mult);
-    if (rc){
-        printf("ERROR; return code from pthread_create() is %d\n", rc);
-        exit(-1);
-    }
-    
+
     rc = pthread_create(&print_thread, NULL, print_nums, (void *)&op);
     if (rc){
         printf("ERROR; return code from pthread_create() is %d\n", rc);
         exit(-1);
     }
 
-    rc = pthread_create(&print_thread2, NULL, print_nums, (void *)&op);
-    if (rc){
-        printf("ERROR; return code from pthread_create() is %d\n", rc);
-        exit(-1);
-    }
     printf("made all threads\n");
  
     pthread_join(gen_thread, NULL);
-    pthread_join(mult_thread, NULL);
+    pthread_join(merge_thread, NULL);
     pthread_join(print_thread, NULL);
-    pthread_join(mult_thread2, NULL);
-    pthread_join(print_thread2, NULL);
     
     free_ppipe(p);
     free_ppipe(op);
