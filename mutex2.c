@@ -49,7 +49,7 @@ void write_int_to_ppipe(struct ppipe *p, int i) {
     }
     p->pipebuf[p->end] = i;
     p->end++;
-    printf("write: start: %ld; end: %ld; val: %d\n", p->start, p->end, i);
+    /*printf("write: start: %ld; end: %ld; val: %d\n", p->start, p->end, i);*/
     pthread_cond_signal(&(p->not_empty));
     pthread_mutex_unlock(&(p->mutex));
 }
@@ -65,7 +65,7 @@ int read_int_from_ppipe(struct ppipe *p) {
     if (p->end < PIPEBUFSIZ || p->end <= p->start) {
         pthread_cond_signal(&(p->not_full));
     }
-    printf("read: start: %ld; end: %ld; val: %d\n", p->start, p->end, i);
+    /*printf("read: start: %ld; end: %ld; val: %d\n", p->start, p->end, i);*/
     pthread_mutex_unlock(&(p->mutex));
     return(i);
 }

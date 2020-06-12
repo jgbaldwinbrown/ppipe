@@ -61,7 +61,7 @@ int read_int_from_ppipe(struct ppipe *p) {
     i = p->pipebuf[p->start];
     p->start++;
     pthread_cond_signal(&(p->not_full));
-    printf("start: %ld; end: %ld; val: %d\n", p->start, p->end, i);
+    /*printf("start: %ld; end: %ld; val: %d\n", p->start, p->end, i);*/
     pthread_mutex_unlock(&(p->mutex));
     return(i);
 }
@@ -82,7 +82,7 @@ void *multiply_nums(void *inptr) {
     while (i != -1) {
         i = read_int_from_ppipe(mult->p);
         i_mult = i * mult->factor;
-        printf("%d\n", i_mult);
+        /*printf("%d\n", i_mult);*/
     }
     pthread_exit(NULL);
 }
