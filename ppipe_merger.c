@@ -1,6 +1,7 @@
 #include "ppipe_merger.h"
 #include "circarr.h"
 #include <stdlib.h>
+#include "indexed_ints.h"
 
 #define CIRCARRSIZ 20
 
@@ -18,16 +19,15 @@ void *ppipe_merge(void *inptr) {
             break;
         }
         circarr_add(&c, inbuf);
-        /*printf("added.\n");*/
         while (circarr_poppable(c)) {
             circarr_pop(&c, outbuf);
-            ppipe_write(merger->op, outbuf, false);
+            ppipe_write(merger->op, outbuf);
         }
     }
     while (circarr_poppable(c)) {
         circarr_pop(&c, outbuf);
         /*printf("popped.\n");*/
-        ppipe_write(merger->op, outbuf, false);
+        ppipe_write(merger->op, outbuf);
     }
     ppipe_close(merger->op);
     /*printf("c.buf: %p; c.full: %p; inbuf: %p; outbuf: %p", c.buf, c.full, inbuf, outbuf);*/

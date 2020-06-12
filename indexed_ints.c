@@ -11,7 +11,7 @@ void *generate_indexed_nums(void *inptr) {
         ii.value = i;
         /*printf("generate: ");*/
         /*indexed_int_print(ii);*/
-        ppipe_write(gen->p, &ii, false);
+        ppipe_write(gen->p, &ii);
         /*indexed_int_print(ii);*/
         counter++;
     }
@@ -25,7 +25,6 @@ void *multiply_indexed_nums(void *inptr) {
     int i_mult = 0;
     bool closed = false;
     struct int_multiplier *mult = (struct int_multiplier *) inptr;
-    /*printf("mult%ld:\n", pthread_self());*/
     while (!closed) {
         ppipe_read(mult->p, &ii, &closed);
         if (closed) {
@@ -34,9 +33,7 @@ void *multiply_indexed_nums(void *inptr) {
         i = ii.value;
         i_mult = i * mult->factor;
         ii.value = i_mult;
-        /*printf("multiply: ");*/
-        /*indexed_int_print(ii);*/
-        ppipe_write(mult->op, &ii, closed);
+        ppipe_write(mult->op, &ii);
     }
     ppipe_close(mult->op);
     pthread_exit(NULL);
@@ -46,15 +43,9 @@ void *print_indexed_nums(void *inptr) {
     struct indexed_int ii;
     bool closed = false;
     struct ppipe *p = (struct ppipe *) inptr;
-    /*printf("print%ld:\n", pthread_self());*/
     while (!closed) {
-        /*printf("print is reading; closed: %d\n", closed);*/
         ppipe_read(p, &ii, &closed);
-        /*ppipe_print_contents(p, indexed_int_print_ptr);*/
-        /*printf("print read; closed: %d\n", closed);*/
         if (!closed) {
-            /*printf("printing!\n");*/
-            /*printf("this is the real output:\n");*/
             indexed_int_print(ii);
         }
     }

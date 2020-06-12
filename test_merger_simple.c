@@ -22,8 +22,8 @@ int main(int argc, char *argv[]) {
     pthread_t print_thread;
     int rc;
     
-    struct ppipe p = init_ppipe(sizeof(int));
-    struct ppipe op = init_ppipe(sizeof(int));
+    struct ppipe p = init_ppipe(sizeof(int), 1);
+    struct ppipe op = init_ppipe(sizeof(int), 1);
     
     struct int_generator gen;
     gen.start = 0;

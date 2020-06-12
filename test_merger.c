@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
     pthread_t print_thread;
     int rc;
     
-    struct ppipe p = init_ppipe(sizeof(struct indexed_int));
-    struct ppipe mp = init_ppipe(sizeof(struct indexed_int));
-    struct ppipe op = init_ppipe(sizeof(struct indexed_int));
+    struct ppipe p = init_ppipe(sizeof(struct indexed_int), 1);
+    struct ppipe mp = init_ppipe(sizeof(struct indexed_int), 2);
+    struct ppipe op = init_ppipe(sizeof(struct indexed_int), 1);
     
     struct int_generator gen;
     gen.start = 100;
