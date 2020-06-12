@@ -32,7 +32,7 @@ void double_circular_array(struct circarr *c) {
     free(c->full);
     c->buf = newbuf;
     c->full = newfull;
-    printf("doubled!\n");
+    /*printf("doubled!\n");*/
 }
 
 struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer) (void *)) {
@@ -55,25 +55,28 @@ struct circarr init_circarr(size_t bufsiz, size_t member_size, size_t (*indexer)
     c.member_size = member_size;
     c.bufsiz = bufsiz;
     c.index = indexer;
+    c.printer = NULL;
     /*circarr_print(c);*/
     return(c);
 }
 
 void circarr_add(struct circarr *c, void *value) {
-    printf("c->buf: %p\n", c->buf);
+    /*printf("c->buf: %p\n", c->buf);*/
     size_t index = c->index(value);
     size_t writepos = 0;
-    printf("circarr_add: c->buf: %p; index: %ld; writepos: %ld\n", c->buf, index, writepos);
+    /*printf("circarr_add: c->buf: %p; index: %ld; writepos: %ld\n", c->buf, index, writepos);*/
     while ((index - c->pos) >= c->bufsiz) {
         double_circular_array(c);
     }
     writepos = (index % c->bufsiz) * c->member_size;
-    printf("writepos: %ld; member_size: %ld; bufsiz: %ld; index: %ld; c->buf: %p\n", writepos, c->member_size, c->bufsiz, index, c->buf);
-    printf("buffer contents:");
+    /*printf("writepos: %ld; member_size: %ld; bufsiz: %ld; index: %ld; c->buf: %p\n", writepos, c->member_size, c->bufsiz, index, c->buf);*/
+    /*printf("buffer contents:");*/
+    /*
     for (size_t i=0; i<c->member_size; i++) {
         printf("\t%d", c->buf[writepos]);
     }
     printf("\n");
+    */
     memcpy(&(c->buf[writepos]), value, c->member_size);
     c->full[index%c->bufsiz] = true;
 }
@@ -98,18 +101,24 @@ bool circarr_poppable(struct circarr c) {
 }
 
 void circarr_print(struct circarr c) {
-    int temp = 0;
+    char *temp = NULL;
+     if ((temp = calloc(1, c.member_size)) == NULL) {
+        fputs("out of memory.", stderr);
+        exit(1);
+    }
     size_t pos = 0;
     for (size_t i=0; i < c.bufsiz; i++) {
         pos = i * c.member_size;
-        memcpy(&temp, &(c.buf[pos]), c.member_size);
-        printf("\t%d", temp);
+        memcpy(temp, &(c.buf[pos]), c.member_size);
+        printf("\t");
+        c.printer(temp);
     }
     printf("\n");
     for (size_t i=0; i < c.bufsiz; i++) {
         printf("\t%d", c.full[i]);
     }
     printf("\n");
+    free(temp);
 }
 
 void circarr_free(struct circarr c) {

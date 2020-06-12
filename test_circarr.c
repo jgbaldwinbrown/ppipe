@@ -7,7 +7,7 @@ size_t int_indexer(void *input) {
     size_t j = 0;
     memcpy(&i, input, sizeof(int));
     j=i;
-    printf("index: %ld\n", j);
+    /*printf("index: %ld\n", j);*/
     return(j);
 }
 

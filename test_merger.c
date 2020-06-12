@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
     struct ppipe op = init_ppipe(sizeof(struct indexed_int));
     
     struct int_generator gen;
-    gen.start = 0;
-    gen.end = 100;
+    gen.start = 100;
+    gen.end = 150;
     gen.step = 2;
     gen.p = &p;
     

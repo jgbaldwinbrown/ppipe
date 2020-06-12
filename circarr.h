@@ -19,6 +19,7 @@ struct circarr {
     size_t member_size;
     size_t bufsiz;
     size_t (*index) (void *);
+    void (*printer) (void *);
 };
 
 #endif

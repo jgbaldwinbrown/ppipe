@@ -10,3 +10,4 @@ void *generate_indexed_nums(void *inptr);
 void *multiply_indexed_nums(void *inptr);
 void *print_indexed_nums(void *inptr);
 void indexed_int_print(struct indexed_int);
+void indexed_int_print_ptr(void *);

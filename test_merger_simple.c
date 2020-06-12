@@ -9,13 +9,11 @@
 
 size_t int_indexer(void *i) {
     int ii = 0;
-    int j = 0;
     memcpy(&ii, i, sizeof(int));
-    j=ii;
     /*
     memcpy(&j, i, sizeof(int));
     */
-    return(j);
+    return(ii);
 }
 
 int main(int argc, char *argv[]) {
@@ -30,7 +28,7 @@ int main(int argc, char *argv[]) {
     struct int_generator gen;
     gen.start = 0;
     gen.end = 100;
-    gen.step = 2;
+    gen.step = 1;
     gen.p = &p;
     
     struct ppipe_merger merger;

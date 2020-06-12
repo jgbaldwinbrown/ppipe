@@ -42,3 +42,4 @@ void ppipe_read(struct ppipe *p, void *i, bool *closed);
 void *generate_nums(void *inptr);
 void *multiply_nums(void *inptr);
 void *print_nums(void *inptr);
+void ppipe_print_contents(struct ppipe *p, void (*print_func) (void *));
