@@ -64,11 +64,11 @@ C's `pthreads.h` library has no support for coroutines, though one can imagine
 implementing them the same way that the Unix operating system does: make a
 small shared memory space, use atomic locking to prevent multiple simultaneous
 reads and writes, then hook readers and writers up to it so they can pass data
-to each other. Unlike Unix pipes, which can only have one reader or writer,
-each of which must be a full process, a within-process pipe system can have a
-lightweight thread for each reader and writer, and can have multiple readers
-and multiple writers per pipe without conflict. This allows for straightforward
-implementation of serial concurrency or parallelization.
+to each other. Unlike Unix pipes, which can only have one reader or writer, a
+within-process pipe system can have a lightweight thread for each reader and
+writer, and can have multiple readers and multiple writers per pipe without
+conflict. This allows for straightforward implementation of serial concurrency
+or parallelization.
 
 ## Installation
 
