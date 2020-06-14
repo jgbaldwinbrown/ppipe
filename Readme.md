@@ -184,3 +184,149 @@ For a full example that produces a simple integer generator-multiplier-printer w
 
 ![test]
 (test.pdf)
+
+## Sorted joins of multiple threads
+
+One of the big advantages of this type of concurrent programming is the ease of parallelizing slow steps. If a particular
+coroutine takes in one input at a time from a ppipe, acts on it without regard for other inputs, then
+outputs to another ppipe, it is trivial to parallelize that step by simply adding extra copies of that coroutine
+that read from and write to the same ppipe.
+There is one side effect of such parallelization, however: because the multiple instances of the coroutine
+are running asynchronously, they may not write their data in the same order they read
+it, with the overall result that any sorted inputs will become unsorted outputs. There are two ways
+to remedy this problem. First, as long as the outputs are indexed such that a later program can
+identify the correct sort order of the outputs, a later program can sort them. If, for example,
+one were doing numerical calculations, the numbers of interest could be transported to and from
+pipes in a struct such as:
+
+```c
+struct indexed_int {
+    size_t index;
+    int value;
+}
+```
+
+Here, a later step in a pipeline could re-order the data points using the attached indices.
+There are two downsides to this approach, though. First, sorting the data requires a complete copy of the
+data to be held either in memory or on disk, making otherwise-large-file-friendly programs
+into memory hogs. Second, the sorting program cannot output anything until the entire input
+has been read, preventing practical concurrency.
+
+The second solution solves both of these problems. In this solution, we pass around indexed
+structs as above, but instead of sorting them, we add them to an internal buffer according to their indices,
+then output items from the buffer in order, as the correct items are added to the buffer.
+One can imagine the following hypothetical buffer:
+
+```
+index: 0 --- 1 --- 2 --- 3 --- 4 --- 5 --- ...
+value: 0 --- 0 --- 0 --- 0 --- 0 --- 0 --- ...
+full:  0 --- 0 --- 0 --- 0 --- 0 --- 0 --- ...
+```
+
+That could be filled with values, with the `full` array keeping track of whether a given indexed
+space in memory is currently filled with a valid value. If we add the values 9 and 7 to indices
+3 and 4, we get the following:
+
+```
+index: 0 --- 1 --- 2 --- 3 --- 4 --- 5 --- ...
+value: 0 --- 0 --- 0 --- 9 --- 7 --- 0 --- ...
+full:  0 --- 0 --- 0 --- 1 --- 1 --- 0 --- ...
+```
+
+The values at 3 and 4 are filled, now, but they cannot yet be output, because we must wait for earlier
+values to be output in order to output in sorted order. Now, imagine that the data at index 0 gets added to the
+buffer:
+
+```
+index: 0 --- 1 --- 2 --- 3 --- 4 --- 5 --- ...
+value: 8 --- 0 --- 0 --- 9 --- 7 --- 0 --- ...
+full:  1 --- 0 --- 0 --- 1 --- 1 --- 0 --- ...
+```
+
+At this point, we can now output the value at index 0, mark index 0 as no longer full, and begin waiting for
+index 1:
+
+```
+index: 0 --- 1 --- 2 --- 3 --- 4 --- 5 --- ...
+value: 8 --- 0 --- 0 --- 9 --- 7 --- 0 --- ...
+full:  0 --- 0 --- 0 --- 1 --- 1 --- 0 --- ...
+```
+
+This allows us to accept data from a pipe in unsorted order, put it into an array in sorted order without having
+to go through a sort operation, then print out the data in sorted order.
+In the worst case scenario, where the 0th indexed value is the last one added to the buffer, we must read all input
+before we can output even a single value, but because the coroutines producing the input are producing it based on initially sorted
+input, we expect that the low-indexed inputs will be added to the buffer long before the high indexed inputs will be added,
+and we can incrementally output the values in the buffer without ever storing all data in the buffer simultaneously.
+
+Note that this is not unlike a pigeonhole sort, but with the condition that no two elements can ever use the same key,
+and all keys from 0 to `n-1` are used, where `n` is the total number of indexed items.
+
+The final remaining problem is, how do we go about implementing such a buffer? A typical C array used in the fashion
+above would need to be resized to be larger whenever new inputs were added, but could not be resized to be smaller
+when values from the buffer were removed because that would throw off the indexing. We could add values to the array,
+then shift them left once a sufficient amount of space is available in the array, but that means a large amount of unnecessary
+data copying. A linked list is not effective here, as the list would need to be walked every time a value was inserted
+into the middle of the list. A b-tree or similar has the same problem of walking as a linked list, though it could at least
+be walked in `O(log(n))` time rather than `O(n)` time. The best implementation that I could identify here was a
+circular array, using modular arithmetic to treat a linear array like a circular queue. Unlike a typical queue, which
+only has values added to the end and read from the start, this queue has values added anywhere along it, and read only from
+the start. When the queue becomes too large to be held in the buffer, it is re-sized and all data is copied. Assuming the queue
+does not continue growing in size throughout its use, this should only require `O(log(n))` copies, where `n` is the largest size
+that the queue ever grows to.
+
+### Usage
+
+The function `ppipe_merge` is available from the header `ppipe_merger.h`, and has the
+following API:
+
+```c
+struct ppipe_merger {
+    struct ppipe *p;
+    struct ppipe *op;
+    size_t (*indexer) (void *);
+};
+
+void *ppipe_merge(void *inptr);
+```
+
+`ppipe_merge` is designed to work with `pthread`s, and needs to have a pointer to a struct of type `ppipe_merger` passed to it. `ppipe_merger` contains an input pipe, an output pipe, and a function for indexing the values that are 
+to be sorted. Here's an example that uses it:
+
+```c
+
+/* assume that p is a ppipe that is being filled with unsorted ints */
+/* assume that op is a ppipe that needs to be filled with sorted ints */
+
+size_t index_int(void *input) {
+    size_t output;
+    int temp;
+    memcpy(&temp, input, sizeof(int));
+    output = temp;
+    return(output);
+}
+
+int main() {
+    
+    ...
+    
+    struct ppipe_merger merger;
+    merger.p = p;
+    merger.op = op;
+    merger.indexer = index_int;
+    
+    int rc = pthread_create(&print_thread, NULL, print_nums, (void *)&p);
+    if (rc){
+        printf("ERROR; return code from pthread_create() is %d\n", rc);
+        exit(-1);
+    }
+    
+    ...
+    
+    pthread_join(print_thread, NULL);
+    
+    ...
+    
+}
+
+A complete example of the use of `ppipe_merger` and `ppipe_merge` is available in `test_merger.c`.
