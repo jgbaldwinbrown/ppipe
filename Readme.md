@@ -106,9 +106,9 @@ void *generate_nums(void *inptr) {
     int err=-1;
     struct int_generator *gen = (struct int_generator *) inptr;
     for (int i=gen->start; i<gen->end; i+=gen->step) {
-        ppipe_write(gen->p, &i, false);
+        ppipe_write(gen->p, &i);
     }
-    ppipe_write(gen->p, &err, true);
+    ppipe_close(gen->p);
     pthread_exit(NULL);
 }
 ```
@@ -146,11 +146,10 @@ void *print_nums(void *inptr) {
     int i = 0;
     bool closed = false;
     struct ppipe *p = (struct ppipe *) inptr;
+    ppipe_read(p, &i, &closed);
     while (!closed) {
+        printf("%d\n", i);
         ppipe_read(p, &i, &closed);
-        if (!closed) {
-            printf("%d\n", i);
-        }
     }
     pthread_exit(NULL);
 }
