@@ -327,5 +327,6 @@ int main() {
     ...
     
 }
+```
 
 A complete example of the use of `ppipe_merger` and `ppipe_merge` is available in `test_merger.c`.
