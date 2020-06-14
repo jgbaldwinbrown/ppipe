@@ -1,4 +1,4 @@
-all: mutex1 mutex2 mutex3 ppipe.o test test_circarr ppipe_merger.o test_merger test_merger_simple test.pdf
+all: mutex1 mutex2 mutex3 ppipe.o test test_circarr ppipe_merger.o test_merger test_merger_simple test.pdf test.png
 
 clean:
 	-rm mutex1 mutex2 mutex3 *.o test test_circarr test_merger
@@ -39,6 +39,9 @@ test: test.o ppipe.o
 
 test.pdf: test.dot
 	cat $^ | dot -Nshape=box -Tpdf > $@
+
+test.png: test.dot
+	cat $^ | dot -Nshape=box -Tpng -Gdpi=300 > $@
 
 test_circarr: test_circarr.o circarr.o indexed_ints.o ppipe.o
 	$(CC) $(CFLAGS) $(LIBS) $^ -o $@

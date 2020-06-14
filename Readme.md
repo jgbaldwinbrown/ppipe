@@ -182,7 +182,7 @@ pthread_join(print_thread, NULL);
 
 For a full example that produces a simple integer generator-multiplier-printer with the below structure, see `test.c`:
 
-![test](https://docs.google.com/viewer?url=https://github.com/jgbaldwinbrown/ppipe/raw/master/test.pdf)
+![test](./test.png)
 
 ## Sorted joins of multiple threads
 
