@@ -182,8 +182,7 @@ pthread_join(print_thread, NULL);
 
 For a full example that produces a simple integer generator-multiplier-printer with the below structure, see `test.c`:
 
-![test]
-(test.pdf)
+![test](./test.png)
 
 ## `tee`
 
@@ -359,5 +358,6 @@ int main() {
     ...
     
 }
+```
 
 A complete example of the use of `ppipe_merger` and `ppipe_merge` is available in `test_merger.c`.
