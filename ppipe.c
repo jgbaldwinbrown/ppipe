@@ -129,3 +129,24 @@ void ppipe_print_contents(struct ppipe *p, void (*print_func) (void *)) {
     pthread_mutex_unlock(&(p->mutex));
     printf("\n");
 }
+
+void *tee(void *inptr) {
+    bool closed = false;
+    struct teer *ateer = (struct teer *) inptr;
+    unsigned char *buf = NULL;
+    if ((buf = calloc(1, ateer->p->member_size)) == NULL) {
+        fputs("Out of memory.", stderr);
+        exit(1);
+    }
+    ppipe_read(ateer->p, buf, &closed);
+    while (!closed) {
+        ppipe_write(ateer->op1, buf);
+        ppipe_write(ateer->op2, buf);
+        ppipe_read(ateer->p, buf, &closed);
+    }
+    ppipe_close(ateer->op1);
+    ppipe_close(ateer->op2);
+    free(buf);
+    pthread_exit(NULL);
+}
+

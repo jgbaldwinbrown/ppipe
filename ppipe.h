@@ -33,6 +33,12 @@ struct int_multiplier {
     struct ppipe *op;
 };
 
+struct teer {
+    struct ppipe *p;
+    struct ppipe *op1;
+    struct ppipe *op2;
+};
+
 #endif
 
 struct ppipe init_ppipe(size_t member_size, size_t number_writers);
@@ -44,3 +50,4 @@ void *generate_nums(void *inptr);
 void *multiply_nums(void *inptr);
 void *print_nums(void *inptr);
 void ppipe_print_contents(struct ppipe *p, void (*print_func) (void *));
+void *tee(void *inptr);
