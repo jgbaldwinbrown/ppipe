@@ -185,6 +185,37 @@ For a full example that produces a simple integer generator-multiplier-printer w
 ![test]
 (test.pdf)
 
+## `tee`
+
+`tee` is a function that, much like the Unix command `tee`, makes two outputs for each input. 
+Note that streams produced by `tee` should never be joined together in a later step in a pipeline
+due to blocking -- the `tee` function sequentially writes to each of the output pipes, and if one
+is full, `tee` may block indefinitely if the pipe cannot be emptied without values from the other
+pipe down the line. Here is an example of the use of tee:
+
+```c
+
+/*
+assume there is an input pipe p being filled upstream and two
+output pipes, op1 and op2, being read from downstream.
+*/
+
+struct teer ateer;
+ateer.p = p;
+ateer.op1 = op1;
+ateer.op2 = op2;
+
+pthread_t tee_thread;
+
+rc = pthread_create(&tee_thread, NULL, tee, (void *)&ateer);
+if (rc){
+    printf("ERROR; return code from pthread_create() is %d\n", rc);
+    exit(-1);
+}
+
+pthread_join(tee_thread, NULL);
+```
+
 ## Sorted joins of multiple threads
 
 One of the big advantages of this type of concurrent programming is the ease of parallelizing slow steps. If a particular
